@@ -7,20 +7,22 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.net.Socket;
 
-public class SignupActivity extends AppCompatActivity {
+public class SignupActivity extends AppCompatActivity implements ComunicacionTCP.OnMessageListener{
 
     private EditText correoText;
     private EditText claveText;
     private EditText confirmarText;
     private Button registrarseBtn;
-    private Socket socket;
-    private BufferedReader reader;
-    private BufferedWriter writer;
+    private String correo;
+    private String clave;
+    private String confirmar;
+    private String nuevoUsuario;
     private ComunicacionTCP comm;
 
     @Override
@@ -33,10 +35,18 @@ public class SignupActivity extends AppCompatActivity {
         confirmarText = findViewById(R.id.confirmarText);
         registrarseBtn = findViewById(R.id.registrarseBtn);
         comm = new ComunicacionTCP(this);
+        comm.setObserver(this);
+        comm.solicitarConexion();
 
         registrarseBtn.setOnClickListener(
                 (v) -> {
-                    comm.solicitarConexion();
+                    correo = correoText.getText().toString();
+                    clave = claveText.getText().toString();
+                    confirmar = confirmarText.getText().toString();
+
+                    nuevoUsuario = correo + "," + clave + "," + confirmar;
+                    comm.mandarMensaje(nuevoUsuario);
+
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder.setTitle("Registro completo");
                     builder.setMessage("Se ha registrado con éxito");
@@ -48,5 +58,18 @@ public class SignupActivity extends AppCompatActivity {
                     builder.show();
                 }
         );
+    }
+
+    @Override
+    public void onMessage(String mensaje) {
+        if(mensaje.equals("NO")){
+            //CUMPLE CON LAS REGLAS DE ANDROID!
+            this.runOnUiThread(
+                    ()->{
+                        Toast.makeText(this, "El correo esta MAL", Toast.LENGTH_SHORT).show();
+                    }
+            );
+
+        }
     }
 }

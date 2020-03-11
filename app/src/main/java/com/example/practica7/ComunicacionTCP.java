@@ -2,7 +2,6 @@ package com.example.practica7;
 
 import android.content.Intent;
 import android.widget.Toast;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -18,17 +17,21 @@ public class ComunicacionTCP extends Thread{
     private BufferedReader reader;
     private BufferedWriter writer;
     private SignupActivity app;
+    private OnMessageListener observer;
+
+    public void setObserver(OnMessageListener observer) {
+        this.observer = observer;
+    }
 
     public ComunicacionTCP(SignupActivity app) {
         this.app = app;
-
     }
 
     //Hilo de recepción
     @Override
     public void run() {
         try {
-            this.socket = new Socket("10.2.2.2",5000);
+            this.socket = new Socket("10.0.2.2",5000);
 
             //Reader
             InputStream is = socket.getInputStream();
@@ -74,20 +77,8 @@ public class ComunicacionTCP extends Thread{
     //Recibir mensaje
     public void recibirMensaje() throws IOException{
         String line = reader.readLine();
-        System.out.println("<<<"+line);
-        if(line.equals("SI")){
-            Intent i = new Intent(app, MainActivity.class);
-            app.startActivity(i);
-        }
-        if(line.equals("NO")){
-            //CUMPLE CON LAS REGLAS DE ANDROID!
-            app.runOnUiThread(
-                    ()->{
-                        Toast.makeText(app, "El correo esta MAL", Toast.LENGTH_SHORT).show();
-                    }
-            );
+        observer.onMessage(line);
 
-        }
     }
 
     public void cerrarConexion(){
@@ -97,5 +88,9 @@ public class ComunicacionTCP extends Thread{
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    }
+
+    public interface OnMessageListener {
+        void onMessage(String mensaje);
     }
 }
