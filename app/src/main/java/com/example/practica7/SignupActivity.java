@@ -13,7 +13,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.net.Socket;
 
-public class SignupActivity extends AppCompatActivity implements ComunicacionTCP.OnMessageListener{
+public class SignupActivity extends AppCompatActivity implements ComunicacionTCP.OnMessageListener {
 
     private EditText correoText;
     private EditText claveText;
@@ -23,6 +23,7 @@ public class SignupActivity extends AppCompatActivity implements ComunicacionTCP
     private String clave;
     private String confirmar;
     private String nuevoUsuario;
+    private boolean repetido;
     private ComunicacionTCP comm;
 
     @Override
@@ -35,6 +36,7 @@ public class SignupActivity extends AppCompatActivity implements ComunicacionTCP
         confirmarText = findViewById(R.id.confirmarText);
         registrarseBtn = findViewById(R.id.registrarseBtn);
         comm = new ComunicacionTCP(this);
+        repetido = true;
         comm.setObserver(this);
         comm.solicitarConexion();
 
@@ -44,32 +46,73 @@ public class SignupActivity extends AppCompatActivity implements ComunicacionTCP
                     clave = claveText.getText().toString();
                     confirmar = confirmarText.getText().toString();
 
-                    nuevoUsuario = correo + "," + clave + "," + confirmar;
-                    comm.mandarMensaje(nuevoUsuario);
+                    nuevoUsuario = correo + "," + clave;
 
-                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    builder.setTitle("Registro completo");
-                    builder.setMessage("Se ha registrado con éxito");
-                    builder.setPositiveButton("Ok", (dialog, which) -> {
-                        dialog.dismiss();
-                        Intent i = new Intent(SignupActivity.this, ProfileActivity.class);
-                        startActivity(i);
-                    });
-                    builder.show();
+                    String repetido = comm.getLine();
+
+                    if (clave.equals(confirmar) && (correo.contains("@gmail.com") || correo.contains("@hotmail.com"))
+                            || correo.contains("@outlook.com")) {
+                        comm.mandarMensaje(nuevoUsuario);
+
+
+                        /*AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                        builder.setTitle("Registro completo");
+                        builder.setMessage("Se ha registrado con éxito");
+                        builder.show();*/
+
+                        //Pasar actividad
+                        /*builder.setPositiveButton("Ok", (dialog, which) -> {
+                            dialog.dismiss();
+                            Intent i = new Intent(SignupActivity.this, ProfileActivity.class);
+                            startActivity(i);
+                        });*/
+
+                    } else if (!clave.equals(confirmar)) {
+                        runOnUiThread(
+                                () -> {
+                                    Toast.makeText(this, "Las claves no coinciden", Toast.LENGTH_SHORT).show();
+                                }
+                        );
+                    } else if (!correo.contains("@gmail.com") || !correo.contains("@hotmail.com")
+                            || !correo.contains("@outlook.com")) {
+                        runOnUiThread(
+                                () -> {
+                                    Toast.makeText(this, "El correo no es válido", Toast.LENGTH_SHORT).show();
+                                }
+                        );
+                    } else if (correo.equals("") || clave.contains("") || confirmar.contains("")) {
+                        runOnUiThread(
+                                () -> {
+                                    Toast.makeText(this, "Hay campos vacíos", Toast.LENGTH_SHORT).show();
+                                }
+                        );
+
+                    }
+
                 }
+
         );
     }
 
+    public boolean isRepetido() {
+        return repetido;
+    }
+
+    public void setRepetido(boolean repetido) {
+        this.repetido = repetido;
+    }
+
+
     @Override
     public void onMessage(String mensaje) {
-        if(mensaje.equals("NO")){
+
+        if (mensaje.equals("REPETIDO")) {
             //CUMPLE CON LAS REGLAS DE ANDROID!
             this.runOnUiThread(
-                    ()->{
-                        Toast.makeText(this, "El correo esta MAL", Toast.LENGTH_SHORT).show();
+                    () -> {
+                        Toast.makeText(this, "El correo esta repetiodo", Toast.LENGTH_SHORT).show();
                     }
             );
-
         }
     }
 }
