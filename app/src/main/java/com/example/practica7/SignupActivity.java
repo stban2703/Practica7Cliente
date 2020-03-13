@@ -23,7 +23,6 @@ public class SignupActivity extends AppCompatActivity implements ComunicacionTCP
     private String clave;
     private String confirmar;
     private String nuevoUsuario;
-    private boolean repetido;
     private ComunicacionTCP comm;
 
     @Override
@@ -36,7 +35,6 @@ public class SignupActivity extends AppCompatActivity implements ComunicacionTCP
         confirmarText = findViewById(R.id.confirmarText);
         registrarseBtn = findViewById(R.id.registrarseBtn);
         comm = new ComunicacionTCP(this);
-        repetido = true;
         comm.setObserver(this);
         comm.solicitarConexion();
 
@@ -53,19 +51,6 @@ public class SignupActivity extends AppCompatActivity implements ComunicacionTCP
                     if (clave.equals(confirmar) && (correo.contains("@gmail.com") || correo.contains("@hotmail.com"))
                             || correo.contains("@outlook.com")) {
                         comm.mandarMensaje(nuevoUsuario);
-
-
-                        /*AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                        builder.setTitle("Registro completo");
-                        builder.setMessage("Se ha registrado con éxito");
-                        builder.show();*/
-
-                        //Pasar actividad
-                        /*builder.setPositiveButton("Ok", (dialog, which) -> {
-                            dialog.dismiss();
-                            Intent i = new Intent(SignupActivity.this, ProfileActivity.class);
-                            startActivity(i);
-                        });*/
 
                     } else if (!clave.equals(confirmar)) {
                         runOnUiThread(
@@ -93,15 +78,6 @@ public class SignupActivity extends AppCompatActivity implements ComunicacionTCP
 
         );
     }
-
-    public boolean isRepetido() {
-        return repetido;
-    }
-
-    public void setRepetido(boolean repetido) {
-        this.repetido = repetido;
-    }
-
 
     @Override
     public void onMessage(String mensaje) {

@@ -100,13 +100,17 @@ public class ComunicacionTCP extends Thread {
                         AlertDialog.Builder builder = new AlertDialog.Builder(app);
                         builder.setTitle("Registro completo");
                         builder.setMessage("Se ha registrado con éxito");
+
+                        builder.setPositiveButton("Ok", (dialog, which) -> {
+                            dialog.dismiss();
+                            //Intent i = new Intent(SignupActivity.class, ProfileActivity.class);
+                            Intent i = new Intent(this.app, ProfileActivity.class);
+                            app.startActivity(i);
+                        });
                         builder.show();
-                        //Toast.makeText(app, "OK", Toast.LENGTH_LONG).show();
                     }
             );
-
         }
-
 
         observer.onMessage(line);
     }
